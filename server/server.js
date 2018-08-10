@@ -5,6 +5,8 @@ const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const socketIO = require('socket.io');
 
+const { generateMessage } = require('./utils/message');
+
 const PORT = process.env.PORT || 3000;
 const PUBLIC_PATH = path.join(__dirname, '../public');
 const app = express();
@@ -19,14 +21,24 @@ app.use(express.static(PUBLIC_PATH));
 io.on('connection', socket => {
 	console.log('New user connection!');
 
-	socket.on('createMsg', newMsg => {
+	// Welcome new user when he/she establishes connection
+	socket.emit('newMsg', generateMessage('Admin', 'Welcome to the channel!'));
+
+	// Broadcast message to everyone but a user who sent message
+	socket.broadcast.emit('newMsg', generateMessage('Admin', 'New user joined channel.'));
+
+	socket.on('createMsg', (newMsg, callback) => {
 		console.log('createMsg', newMsg);
 
-		io.emit('newMsg', {
-			from: newMsg.from,
-			text: newMsg.text,
-			createdAt: new Date().getTime(),
-		});
+		io.emit('newMsg', generateMessage(newMsg.from, newMsg.text));
+		callback();
+	});
+
+	socket.on('createLocationMsg', coords => {
+		io.emit(
+			'newMsg',
+			generateMessage('Admin', `Latitude: ${coords.latitude}, longitude: ${coords.longitude}`)
+		);
 	});
 
 	socket.on('disconnect', () => {

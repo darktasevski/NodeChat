@@ -11,7 +11,23 @@
 <body>
 	<h1>Let&apos;s Chat</h1>
 
+	<ol id="message-list">
+
+	</ol>
+
+	<form id="message-form">
+		<label for="author">Your name: </label>
+		<input type="text" name="author" placeholder="Your name">
+		<br>
+		<label for="message">Your message: </label>
+		<input type="text" name="message" placeholder="New Message">
+		<hr>
+		<button>Send</button>
+	</form>
+	<button id="send-location">Send Location?</button>
+
 	<script src="/socket.io/socket.io.js"></script>
+	<script src="/js/libs/jquery-3.3.1.min.js"></script>
 	<script src="/js/index.js"></script>
 </body>
 
