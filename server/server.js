@@ -19,14 +19,14 @@ app.use(express.static(PUBLIC_PATH));
 io.on('connection', socket => {
 	console.log('New user connection!');
 
-	socket.emit('newMsg', {
-		from: 'Leia',
-		text: 'Force is strong in you!',
-		createdAt: Date.now(),
-	});
-
 	socket.on('createMsg', newMsg => {
 		console.log('createMsg', newMsg);
+
+		io.emit('newMsg', {
+			from: newMsg.from,
+			text: newMsg.text,
+			createdAt: new Date().getTime(),
+		});
 	});
 
 	socket.on('disconnect', () => {
