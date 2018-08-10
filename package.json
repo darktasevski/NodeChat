@@ -17,10 +17,10 @@
 	"dependencies": {
 		"body-parser": "^1.18.3",
 		"express": "^4.16.3",
-		"socket.io": "^2.1.1"
+		"socket.io": "^2.1.1",
+		"morgan": "^1.9.0"
 	},
 	"devDependencies": {
-		"morgan": "^1.9.0",
 		"nodemon": "^1.18.3"
 	}
 }
