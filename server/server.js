@@ -6,6 +6,7 @@ const morgan = require('morgan');
 const socketIO = require('socket.io');
 
 const { generateMessage, generateLocationMessage } = require('./utils/message');
+const { isValidString } = require('./utils/validation');
 
 const PORT = process.env.PORT || 3000;
 const PUBLIC_PATH = path.join(__dirname, '../public');
@@ -26,6 +27,14 @@ io.on('connection', socket => {
 
 	// Broadcast message to everyone but a user who sent message
 	socket.broadcast.emit('newMsg', generateMessage('Admin', 'New user joined channel.'));
+
+	socket.on('join', (params, callback) => {
+		if (isValidString(params.name) && isValidString(params.room)) {
+			callback();
+		} else {
+			callback('Name and room name are required!');
+		}
+	});
 
 	socket.on('createMsg', (newMsg, callback) => {
 		console.log('createMsg', newMsg);
