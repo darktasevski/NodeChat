@@ -1,6 +1,22 @@
 var socket = io();
 var locationButton = jQuery('#send-location');
 
+function scrollToBottom() {
+	// Selectors
+	var messages = jQuery('#messages');
+	var newMessage = messages.children('li:last-child');
+	// Heights
+	var clientHeight = messages.prop('clientHeight');
+	var scrollTop = messages.prop('scrollTop');
+	var scrollHeight = messages.prop('scrollHeight');
+	var newMessageHeight = newMessage.innerHeight();
+	var lastMessageHeight = newMessage.prev().innerHeight();
+
+	if (clientHeight + scrollTop + newMessageHeight + lastMessageHeight >= scrollHeight) {
+		messages.scrollTop(scrollHeight);
+	}
+}
+
 socket.on('connect', function() {
 	console.log('Connected');
 });
@@ -10,24 +26,29 @@ socket.on('disconnect', function() {
 });
 
 socket.on('newMsg', function(message) {
-	var li = jQuery('<li></li>');
+	var template = jQuery('#message-template').html();
 	var formattedTime = moment(message.createdAt).format('h:mm a');
-	li.text(`${formattedTime} - ${message.from}: ${message.text}`);
+	var html = Mustache.render(template, {
+		text: message.text,
+		from: message.from,
+		createdAt: formattedTime,
+	});
 
-	jQuery('#message-list').append(li);
-	console.log('New message arrived', message);
+	jQuery('#messages').append(html);
+	scrollToBottom();
 });
 
 socket.on('newLocationMsg', function(message) {
-	var li = jQuery('<li></li>');
 	var formattedTime = moment(message.createdAt).format('h:mm a');
-	var a = jQuery(`<a target="_blank">My current location</a>`);
+	var template = jQuery('#location-message-template').html();
+	var html = Mustache.render(template, {
+		from: message.from,
+		url: message.url,
+		createdAt: formattedTime,
+	});
 
-	li.text(`${formattedTime} - ${message.from}: `);
-	a.attr('href', message.url);
-
-	li.append(a);
-	jQuery('#message-list').append(li);
+	jQuery('#messages').append(html);
+	scrollToBottom();
 });
 
 // Example of client-side event acknowledgement
@@ -67,7 +88,7 @@ locationButton.on('click', function() {
 		return alert('Please enable geolocation');
 	}
 
-	this.attr('disabled', 'disabled').text('Locating...');
+	locationButton.attr('disabled', 'disabled').text('Locating...');
 
 	navigator.geolocation.getCurrentPosition(
 		function(position) {
