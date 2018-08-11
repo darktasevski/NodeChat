@@ -10,36 +10,54 @@ socket.on('disconnect', function() {
 });
 
 socket.on('newMsg', function(message) {
-	console.log('New message arrived', message);
 	var li = jQuery('<li></li>');
-	li.text(`${message.from} -- ${message.text}`);
+	var formattedTime = moment(message.createdAt).format('h:mm a');
+	li.text(`${formattedTime} - ${message.from}: ${message.text}`);
 
+	jQuery('#message-list').append(li);
+	console.log('New message arrived', message);
+});
+
+socket.on('newLocationMsg', function(message) {
+	var li = jQuery('<li></li>');
+	var formattedTime = moment(message.createdAt).format('h:mm a');
+	var a = jQuery(`<a target="_blank">My current location</a>`);
+
+	li.text(`${formattedTime} - ${message.from}: `);
+	a.attr('href', message.url);
+
+	li.append(a);
 	jQuery('#message-list').append(li);
 });
 
 // Example of client-side event acknowledgement
-socket.emit(
-	'createMsg',
-	{
-		from: 'Frank',
-		text: 'Damn',
-	},
-	function() {
-		console.log('Message sent');
-	}
-);
+// socket.emit(
+// 	'createMsg',
+// 	{
+// 		from: 'Frank',
+// 		text: 'Damn',
+// 	},
+// 	function() {
+// 		console.log('Message sent');
+// 	}
+// );
 
 jQuery('#message-form').on('submit', function(e) {
 	e.preventDefault();
 
+	var authorInput = jQuery('[name=author]');
+	var textInput = jQuery('[name=message]');
+
 	socket.emit(
 		'createMsg',
 		{
-			from: jQuery('[name=author]').val(),
-			text: jQuery('[name=message]').val(),
+			from: authorInput.val(),
+			text: textInput.val(),
 		},
 		function() {
 			console.log('Message sent');
+			authorInput.val('');
+			textInput.val('');
 		}
 	);
 });
@@ -49,14 +67,18 @@ locationButton.on('click', function() {
 		return alert('Please enable geolocation');
 	}
 
+	this.attr('disabled', 'disabled').text('Locating...');
+
 	navigator.geolocation.getCurrentPosition(
 		function(position) {
+			locationButton.removeAttr('disabled').text('Send location');
 			socket.emit('createLocationMsg', {
 				latitude: position.coords.latitude,
 				longitude: position.coords.longitude,
 			});
 		},
 		function(arguments) {
+			locationButton.removeAttr('disabled').text('Send location');
 			alert('Unable to fetch location');
 		}
 	);

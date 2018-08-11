@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const socketIO = require('socket.io');
 
-const { generateMessage } = require('./utils/message');
+const { generateMessage, generateLocationMessage } = require('./utils/message');
 
 const PORT = process.env.PORT || 3000;
 const PUBLIC_PATH = path.join(__dirname, '../public');
@@ -36,8 +36,8 @@ io.on('connection', socket => {
 
 	socket.on('createLocationMsg', coords => {
 		io.emit(
-			'newMsg',
-			generateMessage('Admin', `Latitude: ${coords.latitude}, longitude: ${coords.longitude}`)
+			'newLocationMsg',
+			generateLocationMessage('Admin', coords.latitude, coords.longitude)
 		);
 	});
 
