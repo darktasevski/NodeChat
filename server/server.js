@@ -70,7 +70,7 @@ io.on('connection', socket => {
 		if (user) {
 			io.to(user.room).emit(
 				'newLocationMsg',
-				generateLocationMessage('Admin', coords.latitude, coords.longitude)
+				generateLocationMessage(user.name, coords.latitude, coords.longitude)
 			);
 		}
 	});
