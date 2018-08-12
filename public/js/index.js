@@ -74,18 +74,14 @@ socket.on('newLocationMsg', function(message) {
 jQuery('#message-form').on('submit', function(e) {
 	e.preventDefault();
 
-	var authorInput = jQuery('[name=name]');
 	var textInput = jQuery('[name=message]');
 
 	socket.emit(
 		'createMsg',
 		{
-			from: authorInput.val(),
 			text: textInput.val(),
 		},
 		function() {
-			console.log('Message sent');
-			authorInput.val('');
 			textInput.val('');
 		}
 	);

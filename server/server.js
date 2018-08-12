@@ -56,17 +56,23 @@ io.on('connection', socket => {
 	});
 
 	socket.on('createMsg', (newMsg, callback) => {
-		console.log('createMsg', newMsg);
+		const user = users.getUser(socket.id);
 		// Emits to every connected user
-		io.emit('newMsg', generateMessage(newMsg.from, newMsg.text));
-		callback();
+		if (user && isValidString(newMsg.text)) {
+			io.to(user.room).emit('newMsg', generateMessage(user.name, newMsg.text));
+			callback();
+		}
 	});
 
 	socket.on('createLocationMsg', coords => {
-		io.emit(
-			'newLocationMsg',
-			generateLocationMessage('Admin', coords.latitude, coords.longitude)
-		);
+		const user = users.getUser(socket.id);
+
+		if (user) {
+			io.to(user.room).emit(
+				'newLocationMsg',
+				generateLocationMessage('Admin', coords.latitude, coords.longitude)
+			);
+		}
 	});
 
 	socket.on('disconnect', () => {
