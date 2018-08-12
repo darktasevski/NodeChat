@@ -23,22 +23,34 @@ io.on('connection', socket => {
 	console.log('New user connection!');
 
 	// Welcome new user when he/she establishes connection
-	socket.emit('newMsg', generateMessage('Admin', 'Welcome to the channel!'));
+	// socket.emit('newMsg', generateMessage('Admin', 'Welcome to the channel!'));
 
 	// Broadcast message to everyone but a user who sent message
-	socket.broadcast.emit('newMsg', generateMessage('Admin', 'New user joined channel.'));
+	// socket.broadcast.emit('newMsg', generateMessage('Admin', 'New user joined channel.'));
 
 	socket.on('join', (params, callback) => {
 		if (isValidString(params.name) && isValidString(params.room)) {
-			callback();
+			socket.join(params.room);
+			// socket.leave(params.room);
+
+			// Welcome new user when he/she establishes connection
+			socket.emit('newMsg', generateMessage('Admin', 'Welcome to the channel!'));
+
+			// Broadcast message to everyone but a user who sent message
+			socket.broadcast
+				.to(params.room)
+				.emit('newMsg', generateMessage('Admin', `${params.name} has joined!`));
+
+			return callback();
 		} else {
-			callback('Name and room name are required!');
+			return callback('Name and room name are required!');
 		}
 	});
 
 	socket.on('createMsg', (newMsg, callback) => {
 		console.log('createMsg', newMsg);
 
+		// Emits to every connected user
 		io.emit('newMsg', generateMessage(newMsg.from, newMsg.text));
 		callback();
 	});
