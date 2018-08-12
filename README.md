@@ -1,10 +1,9 @@
 # Node Chat App
 
-One Paragraph of project description goes here
+Chat application with rooms functionality.
 
 ## Getting Started
-
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+If you want to try out this project locally, you can clone this repo, install dependencies and, once they're installed, run `npm run dev` via your command line. Application then can be found on `localhost:3000`.
 
 ### Prerequisites
 
@@ -12,14 +11,14 @@ These instructions will get you a copy of the project up and running on your loc
 -   `npm || yarn`
 
 ## Deployment
-
-Add additional notes about how to deploy this on a live system
+You can visit deployed app on Heroku: https://nodetalkz.herokuapp.com/. 
 
 ## Built With
 
--   [Node](#) -
--   [Express](#) -
--   [MongoDB](#) -
+-   [Node](#) -  JavaScript runtime built on Chrome's V8 JavaScript engine.
+-   [Socket.io](#) - Socket.IO enables real-time, bidirectional and event-based communication.
+-   [jQuery](#) - The Write Less, Do More, JavaScript Library.
+
 
 ## Contributing
 
