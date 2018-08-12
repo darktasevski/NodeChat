@@ -34,12 +34,23 @@ socket.on('disconnect', function() {
 	console.log('Disconnected');
 });
 
+socket.on('updateUserList', function(users) {
+	var ul = jQuery('<ul></ul>');
+
+	users.forEach(function(user) {
+		var li = `<li>${user.name}</li>`;
+		ul.append(li);
+	});
+
+	jQuery('#users').html(ul);
+});
+
 socket.on('newMsg', function(message) {
 	var template = jQuery('#message-template').html();
 	var formattedTime = moment(message.createdAt).format('h:mm a');
 	var html = Mustache.render(template, {
-		text: message.text,
 		from: message.from,
+		text: message.text,
 		createdAt: formattedTime,
 	});
 
@@ -60,22 +71,10 @@ socket.on('newLocationMsg', function(message) {
 	scrollToBottom();
 });
 
-// Example of client-side event acknowledgement
-// socket.emit(
-// 	'createMsg',
-// 	{
-// 		from: 'Frank',
-// 		text: 'Damn',
-// 	},
-// 	function() {
-// 		console.log('Message sent');
-// 	}
-// );
-
 jQuery('#message-form').on('submit', function(e) {
 	e.preventDefault();
 
-	var authorInput = jQuery('[name=author]');
+	var authorInput = jQuery('[name=name]');
 	var textInput = jQuery('[name=message]');
 
 	socket.emit(

@@ -7,12 +7,14 @@ const socketIO = require('socket.io');
 
 const { generateMessage, generateLocationMessage } = require('./utils/message');
 const { isValidString } = require('./utils/validation');
+const Users = require('./utils/users');
 
 const PORT = process.env.PORT || 3000;
 const PUBLIC_PATH = path.join(__dirname, '../public');
 const app = express();
 const server = http.createServer(app);
 const io = socketIO(server);
+const users = new Users();
 
 app.use(bodyParser.json());
 app.use(morgan('combined'));
@@ -31,7 +33,13 @@ io.on('connection', socket => {
 	socket.on('join', (params, callback) => {
 		if (isValidString(params.name) && isValidString(params.room)) {
 			socket.join(params.room);
-			// socket.leave(params.room);
+			// in case we want to kick out user: socket.leave(params.room);
+			// Remove user from other rooms
+			users.removeUser(socket.id);
+			// and add it to the new room
+			users.addUser(socket.id, params.name, params.room);
+
+			io.to(params.room).emit('updateUserList', users.getUserList(params.room));
 
 			// Welcome new user when he/she establishes connection
 			socket.emit('newMsg', generateMessage('Admin', 'Welcome to the channel!'));
@@ -49,7 +57,6 @@ io.on('connection', socket => {
 
 	socket.on('createMsg', (newMsg, callback) => {
 		console.log('createMsg', newMsg);
-
 		// Emits to every connected user
 		io.emit('newMsg', generateMessage(newMsg.from, newMsg.text));
 		callback();
@@ -64,6 +71,15 @@ io.on('connection', socket => {
 
 	socket.on('disconnect', () => {
 		console.log('User disconnected');
+		const removedUser = users.removeUser(socket.id);
+
+		if (removedUser) {
+			io.to(removedUser.room).emit('updateUserList', users.getUserList(removedUser.room));
+			io.to(removedUser.room).emit(
+				'newMsg',
+				generateMessage('Admin', `${removedUser.name} left the channel.`)
+			);
+		}
 	});
 });
 
